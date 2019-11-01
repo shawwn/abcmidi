@@ -19,6 +19,7 @@ add_executable(abcmidi
     matchsup.c
     mftext.c
     midi2abc.c
+    midi2xyz.c
     midicopy.c
     midicopy.h
     midifile.c

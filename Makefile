@@ -7,7 +7,7 @@
 # NOFTELL in midifile.c and genmidi.c selects a version of the file-writing
 #         code which doesn't use file seeking.
 #
-# PCCFIX in mftext.c midifile.c midi2abc.c
+# PCCFIX in mftext.c midifile.c midi2abc.c midi2xyz.c
 #        comments out various things that aren't available in PCC
 #
 # ANSILIBS includes some ANSI header files (which gcc can live without,
@@ -53,9 +53,9 @@ datadir = ${prefix}/share
 docdir = ${prefix}/share/doc/abcmidi
 mandir = ${prefix}/share/man/man1
 
-binaries=abc2midi midi2abc abc2abc mftext yaps midicopy abcmatch
+binaries=abc2midi midi2xyz midi2abc abc2abc mftext yaps midicopy abcmatch
 
-all : abc2midi midi2abc abc2abc mftext yaps midicopy abcmatch
+all : abc2midi midi2xyz midi2abc abc2abc mftext yaps midicopy abcmatch
 
 OBJECTS_ABC2MIDI=parseabc.o store.o genmidi.o midifile.o queues.o parser2.o stresspat.o
 abc2midi : $(OBJECTS_ABC2MIDI)
@@ -67,10 +67,10 @@ abc2abc : $(OBJECTS_ABC2ABC)
 	$(CC) $(CFLAGS) -o abc2abc $(OBJECTS_ABC2ABC) $(LDFLAGS)
 $(OBJECTS_ABC2ABC): abc.h parseabc.h config.h Makefile
 
-OBJECTS_MIDI2ABC=midifile.o midi2abc.o 
-midi2abc : $(OBJECTS_MIDI2ABC)
-	$(CC) $(CFLAGS) -o midi2abc $(OBJECTS_MIDI2ABC) $(LDFLAGS)
-$(OBJECTS_MIDI2ABC): abc.h midifile.h config.h Makefile
+OBJECTS_MIDI2XYZ=midifile.o midi2xyz.o 
+midi2xyz : $(OBJECTS_MIDI2XYZ)
+	$(CC) $(CFLAGS) -o midi2xyz $(OBJECTS_MIDI2XYZ) $(LDFLAGS)
+$(OBJECTS_MIDI2XYZ): abc.h midifile.h config.h Makefile
 
 OBJECTS_MFTEXT=midifile.o mftext.o crack.o
 mftext : $(OBJECTS_MFTEXT)
@@ -112,6 +112,8 @@ midifile.o : midifile.c midifile.h
 
 midi2abc.o : midi2abc.c midifile.h
 
+midi2xyz.o : midi2xyz.c midifile.h
+
 midicopy.o : midicopy.c midicopy.h
 
 abcmatch.o: abcmatch.c abc.h
@@ -139,7 +141,7 @@ matchsup.o : matchsup.c abc.h parseabc.h parser2.h
 clean :
 	rm *.o ${binaries}
 
-install: abc2midi midi2abc abc2abc mftext midicopy yaps abcmatch
+install: abc2midi midi2abc midi2xyz abc2abc mftext midicopy yaps abcmatch
 	$(INSTALL) -d $(DESTDIR)$(bindir)
 	$(INSTALL) -m 755 ${binaries} $(DESTDIR)$(bindir)
 
@@ -162,6 +164,7 @@ uninstall:
 	rm -f $(DESTDIR)$(bindir)/abc2abc
 	rm -f $(DESTDIR)$(bindir)/yaps
 	rm -f $(DESTDIR)$(bindir)/midi2abc
+	rm -f $(DESTDIR)$(bindir)/midi2xyz
 	rm -f $(DESTDIR)$(bindir)/mftext
 	rm -f $(DESTDIR)$(bindir)/abcmatch
 	rm -f $(DESTDIR)$(bindir)/midicopy
