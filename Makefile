@@ -34,13 +34,13 @@
 VERSION = @VERSION@
 
 CC = gcc
-INSTALL = /usr/bin/install -c
+INSTALL = /usr/local/bin/ginstall -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 
 CFLAGS = -DANSILIBS  -O2  
-CPPFLAGS = -DHAVE_CONFIG_H  -I. 
-LDFLAGS =  -lm
+CPPFLAGS = -DHAVE_CONFIG_H -I/usr/local/opt/ruby/include -I. 
+LDFLAGS = -L/usr/local/opt/ruby/lib -lm
 
 prefix = /usr/local
 exec_prefix = ${prefix}

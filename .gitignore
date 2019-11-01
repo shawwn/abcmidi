@@ -1,0 +1,14 @@
+*.o
+abc2abc
+abc2midi
+abcmatch
+mftext
+midi2abc
+midicopy
+yaps
+.idea/
+cmake-build-debug
+cmake-build-release
+build/
+config.log
+config.status
