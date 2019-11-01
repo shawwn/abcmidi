@@ -1,4 +1,4 @@
-/* midi2abc - program to convert MIDI files to abc notation.
+/* midi2xyz - program to convert MIDI files to xyz notation.
  * Copyright (C) 1998 James Allwright
  * e-mail: J.R.Allwright@westminster.ac.uk
  *
@@ -18,7 +18,7 @@
  */
  
 
-/* new midi2abc - converts MIDI file to abc format files
+/* new midi2xyz - converts MIDI file to xyz format files
  * 
  *
  * re-written to use dynamic data structures 
@@ -45,7 +45,7 @@
  * based on public domain 'midifilelib' package.
  */
 
-#define VERSION "3.39 August 11 2019"
+#define VERSION "0.01 November 1 2019"
 
 /* Microsoft Visual C++ Version 6.0 or higher */
 #ifdef _MSC_VER
@@ -129,7 +129,7 @@ int guessk;   /* flag - guess key signature                     */
 int summary;  /* flag - output summary info of MIDI file        */
 int keep_short; /*flag - preserve short notes                   */
 int swallow_rests; /* flag - absorb short rests                 */
-int midiprint; /* flag - run midigram instead of midi2abc       */
+int midiprint; /* flag - run midigram instead of midi2xyz       */
 int stats = 0; /* flag - gather and print statistics            */
 int usesplits; /* flag - split measure into parts if needed     */
 int restsize; /* smallest rest to absorb                        */
@@ -307,6 +307,65 @@ static int progmapper[] = {
 16, 16, 16, 16, 16, 16, 16, 16
 };
 
+static char *patches[] = {
+        "Acoustic Grand","Bright Acoustic","Electric Grand","Honky-Tonk",
+        "Electric Piano 1","Electric Piano 2","Harpsichord","Clav",
+        "Celesta", "Glockenspiel",  "Music Box",  "Vibraphone",
+        "Marimba", "Xylophone", "Tubular Bells", "Dulcimer",
+        "Drawbar Organ", "Percussive Organ", "Rock Organ", "Church Organ",
+        "Reed Organ", "Accordian", "Harmonica", "Tango Accordian",
+        "Acoustic Guitar (nylon)", "Acoustic Guitar (steel)",
+        "Electric Guitar (jazz)", "Electric Guitar (clean)",
+        "Electric Guitar (muted)", "Overdriven Guitar",
+        "Distortion Guitar", "Guitar Harmonics",
+        "Acoustic Bass", "Electric Bass (finger)",
+        "Electric Bass (pick)", "Fretless Bass",
+        "Slap Bass 1", "Slap Bass 2", "Synth Bass 1", "Synth Bass 2",
+        "Violin", "Viola", "Cello", "Contrabass",
+        "Tremolo Strings", "Pizzicato Strings",
+        "Orchestral Strings", "Timpani",
+        "String Ensemble 1", "String Ensemble 2",
+        "SynthStrings 1", "SynthStrings 2",
+        "Choir Aahs", "Voice Oohs", "Synth Voice", "Orchestra Hit",
+        "Trumpet", "Trombone", "Tuba", "Muted Trumpet",
+        "French Horn", "Brass Section", "SynthBrass 1", "SynthBrass 2",
+        "Soprano Sax", "Alto Sax", "Tenor Sax", "Baritone Sax",
+        "Oboe", "English Horn", "Bassoon", "Clarinet",
+        "Piccolo", "Flute", "Recorder", "Pan Flute",
+        "Blown Bottle", "Skakuhachi", "Whistle", "Ocarina",
+        "Lead 1 (square)", "Lead 2 (sawtooth)",
+        "Lead 3 (calliope)", "Lead 4 (chiff)",
+        "Lead 5 (charang)", "Lead 6 (voice)",
+        "Lead 7 (fifths)", "Lead 8 (bass+lead)",
+        "Pad 1 (new age)", "Pad 2 (warm)",
+        "Pad 3 (polysynth)", "Pad 4 (choir)",
+        "Pad 5 (bowed)", "Pad 6 (metallic)",
+        "Pad 7 (halo)", "Pad 8 (sweep)",
+        "FX 1 (rain)", "(soundtrack)",
+        "FX 3 (crystal)", "FX 4 (atmosphere)",
+        "FX 5 (brightness)", "FX 6 (goblins)",
+        "FX 7 (echoes)", "FX 8 (sci-fi)",
+        "Sitar", "Banjo", "Shamisen", "Koto",
+        "Kalimba", "Bagpipe", "Fiddle", "Shanai",
+        "Tinkle Bell", "Agogo", "Steel Drums", "Woodblock",
+        "Taiko Drum", "Melodic Tom", "Synth Drum", "Reverse Cymbal",
+        "Guitar Fret Noise", "Breath Noise", "Seashore", "Bird Tweet",
+        "Telephone ring", "Helicopter", "Applause", "Gunshot"};
+
+static char *drumpatches[] = {
+        "Acoustic Bass Drum", "Bass Drum 1", "Side Stick", "Acoustic Snare",
+        "Hand Clap", "Electric Snare", "Low Floor Tom", "Closed Hi Hat",
+        "High Floor Tom", "Pedal Hi-Hat", "Low Tom", "Open Hi-Hat",
+        "Low-Mid Tom", "Hi Mid Tom", "Crash Cymbal 1", "High Tom",
+        "Ride Cymbal 1", "Chinese Cymbal", "Ride Bell", "Tambourine",
+        "Splash Cymbal", "Cowbell", "Crash Cymbal 2", "Vibraslap",
+        "Ride Cymbal 2", "Hi Bongo", "Low Bongo",	"Mute Hi Conga",
+        "Open Hi Conga", "Low Conga", "High Timbale", "Low Timbale",
+        "High Agogo", "Low Agogo", "Cabasa", "Maracas",
+        "Short Whistle", "Long Whistle", "Short Guiro", "Long Guiro",
+        "Claves", "Hi Wood Block", "Low Wood Block", "Mute Cuica",
+        "Open Cuica", "Mute Triangle", "Open Triangle" };
+
 /*              Stage 1. Parsing MIDI file                   */
 
 /* Functions called during the reading pass of the MIDI file */
@@ -366,7 +425,7 @@ char* s;
   int numbytes;
 
   /* p = (char*) checkmalloc(strlen(s)+1); */
-  /* Integer overflow leading to heap buffer overflow in midi2abc
+  /* Integer overflow leading to heap buffer overflow in midi2xyz
    * Debian Bug report log #924947 [SS] 2019-08-11
    * https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=924947
    */
@@ -747,7 +806,7 @@ int chan, program;
   sprintf(textbuff, "%%%%MIDI program %d %d",
          chan+1, program);
 */
-  sprintf(textbuff, "%%%%MIDI program %d", program);
+  sprintf(textbuff, "%%%%MIDI program %d\n%% %s", program, patches[program]);
   addtext(textbuff,0);
 /* abc2midi does not use the same channel number as specified in 
   the original midi file, so we should not specify that channel
@@ -764,7 +823,7 @@ int chan, program;
   sprintf(textbuff, "%%%%MIDI program %d %d",
          chan+1, program);
 */
-  sprintf(textbuff, "%%%%MIDI program %d", program);
+  sprintf(textbuff, "%%%%MIDI program %d\n%% %s", program, patches[program]);
   addtext_type0(textbuff,0,chan);
 /* abc2midi does not use the same channel number as specified in 
   the original midi file, so we should not specify that channel
@@ -1109,19 +1168,6 @@ char* s = name;
 void pitch2drum(midipitch)
 int midipitch;
 {
-static char *drumpatches[] = {
- "Acoustic Bass Drum", "Bass Drum 1", "Side Stick", "Acoustic Snare",
- "Hand Clap", "Electric Snare", "Low Floor Tom", "Closed Hi Hat",
- "High Floor Tom", "Pedal Hi-Hat", "Low Tom", "Open Hi-Hat",
- "Low-Mid Tom", "Hi Mid Tom", "Crash Cymbal 1", "High Tom",		
- "Ride Cymbal 1", "Chinese Cymbal", "Ride Bell", "Tambourine",
- "Splash Cymbal", "Cowbell", "Crash Cymbal 2", "Vibraslap",
- "Ride Cymbal 2", "Hi Bongo", "Low Bongo",	"Mute Hi Conga",
- "Open Hi Conga", "Low Conga", "High Timbale", "Low Timbale",
- "High Agogo", "Low Agogo", "Cabasa", "Maracas",
- "Short Whistle", "Long Whistle", "Short Guiro", "Long Guiro",
- "Claves", "Hi Wood Block", "Low Wood Block", "Mute Cuica",
- "Open Cuica", "Mute Triangle", "Open Triangle" };
 if (midipitch >= 35 && midipitch <= 81) {
   printf(" (%s)",drumpatches[midipitch-35]);
   }
@@ -1446,50 +1492,6 @@ trkdata.pitchbend[chan+1]++;
 void mftxt_program(chan,program)
 int chan, program;
 {
-static char *patches[] = {
- "Acoustic Grand","Bright Acoustic","Electric Grand","Honky-Tonk", 
- "Electric Piano 1","Electric Piano 2","Harpsichord","Clav", 
- "Celesta", "Glockenspiel",  "Music Box",  "Vibraphone", 
- "Marimba", "Xylophone", "Tubular Bells", "Dulcimer", 
- "Drawbar Organ", "Percussive Organ", "Rock Organ", "Church Organ", 
- "Reed Organ", "Accordian", "Harmonica", "Tango Accordian",
- "Acoustic Guitar (nylon)", "Acoustic Guitar (steel)",
- "Electric Guitar (jazz)", "Electric Guitar (clean)", 
- "Electric Guitar (muted)", "Overdriven Guitar",
- "Distortion Guitar", "Guitar Harmonics",
- "Acoustic Bass", "Electric Bass (finger)",
- "Electric Bass (pick)", "Fretless Bass",
- "Slap Bass 1", "Slap Bass 2", "Synth Bass 1", "Synth Bass 2",
- "Violin", "Viola", "Cello", "Contrabass",
- "Tremolo Strings", "Pizzicato Strings",
- "Orchestral Strings", "Timpani",
- "String Ensemble 1", "String Ensemble 2",
- "SynthStrings 1", "SynthStrings 2", 
- "Choir Aahs", "Voice Oohs", "Synth Voice", "Orchestra Hit",
- "Trumpet", "Trombone", "Tuba", "Muted Trumpet",
- "French Horn", "Brass Section", "SynthBrass 1", "SynthBrass 2",
- "Soprano Sax", "Alto Sax", "Tenor Sax", "Baritone Sax",
- "Oboe", "English Horn", "Bassoon", "Clarinet",
- "Piccolo", "Flute", "Recorder", "Pan Flute",
- "Blown Bottle", "Skakuhachi", "Whistle", "Ocarina",
- "Lead 1 (square)", "Lead 2 (sawtooth)",
- "Lead 3 (calliope)", "Lead 4 (chiff)", 
- "Lead 5 (charang)", "Lead 6 (voice)",
- "Lead 7 (fifths)", "Lead 8 (bass+lead)",
- "Pad 1 (new age)", "Pad 2 (warm)",
- "Pad 3 (polysynth)", "Pad 4 (choir)",
- "Pad 5 (bowed)", "Pad 6 (metallic)",
- "Pad 7 (halo)", "Pad 8 (sweep)",
- "FX 1 (rain)", "(soundtrack)",
- "FX 3 (crystal)", "FX 4 (atmosphere)",
- "FX 5 (brightness)", "FX 6 (goblins)",
- "FX 7 (echoes)", "FX 8 (sci-fi)",
- "Sitar", "Banjo", "Shamisen", "Koto",
- "Kalimba", "Bagpipe", "Fiddle", "Shanai",
- "Tinkle Bell", "Agogo", "Steel Drums", "Woodblock",
- "Taiko Drum", "Melodic Tom", "Synth Drum", "Reverse Cymbal",
- "Guitar Fret Noise", "Breath Noise", "Seashore", "Bird Tweet",
- "Telephone ring", "Helicopter", "Applause", "Gunshot"};
 /*
   if (onlychan >=0 && chan != onlychan) return;
 */
@@ -2487,6 +2489,22 @@ int trackno, barbeats, anacrusis;
   return(breakcount);
 }
 
+int pitch2octave(p)
+/* convert numerical value to octave */
+        int p;
+{
+  int octave = 4;
+  while (p >= MIDDLE + 12) {
+    octave = octave + 1;
+    p = p - 12;
+  };
+  while (p < MIDDLE - 12) {
+    octave = octave - 1;
+    p = p + 12;
+  };
+  return octave;
+}
+
 void printpitch(j)
 /* convert numerical value to abc pitch */
 struct anote* j;
@@ -2508,6 +2526,7 @@ struct anote* j;
     else {
       fprintf(outhandle,"%c", atog[p]);
     };
+#if 0
     while (p >= MIDDLE + 12) {
       fprintf(outhandle,"'");
       p = p - 12;
@@ -2516,6 +2535,9 @@ struct anote* j;
       fprintf(outhandle,",");
       p = p + 12;
     };
+#else
+    fprintf(outhandle,"(%d)", pitch2octave(p));
+#endif
   };
 }
 
@@ -2550,17 +2572,28 @@ void printfract(a, b)
 int a, b;
 {
   int c, d;
+  float n;
+  float u, v;
 
   c = a;
   d = b;
   reduce(&c,&d);
+  n = 64 / d;
+  u = c * n;
+  v = d * n;
   /* print out length */
-  if (c != 1) {
-    fprintf(outhandle,"%d", c);
+  /* if (c != 1) */ {
+#if 0
+    fprintf(outhandle,"%02.2f", u);
+#else
+    fprintf(outhandle,"%03x", (int)u);
+#endif
   };
-  if (d != 1) {
-    fprintf(outhandle,"/%d", d);
+#if 0
+  /* if (d != 1) */ {
+    fprintf(outhandle,"/%02.2f", v);
   };
+#endif
 }
 
 void printchord(len)
@@ -3089,7 +3122,7 @@ void printtrack_split (int trackno, int splitnum, int anacrusis)
       };
       if (featurecount == 3)
         {
-        fprintf(outhandle," (3");
+        fprintf(outhandle,"?");
         };
       printchord(step);
       if ( featurecount > 0) {
@@ -3108,7 +3141,7 @@ void printtrack_split (int trackno, int splitnum, int anacrusis)
             fprintf(outhandle,"\n\nProbably infinite loop: aborting\n");
             return;
             }
-        fprintf(outhandle,"|");
+        fprintf(outhandle,"\n");
 	reset_back_array();
         barnotes = barsize;
         barcount = barcount + 1;
@@ -3123,6 +3156,7 @@ void printtrack_split (int trackno, int splitnum, int anacrusis)
 	       	freshline();
 	        bars_on_line=0;}
       }
+#if 0
       else if (featurecount == 0) {
           /* note grouping algorithm */
           /* [SS] 2016-07-20 waltz is a special case */
@@ -3142,6 +3176,7 @@ void printtrack_split (int trackno, int splitnum, int anacrusis)
             };
           };
       }
+#endif
       if (nogr) {fprintf(outhandle," "); newline_flag = 0;}
     };
   if (barcount > maxbarcount) maxbarcount = barcount;
@@ -3255,7 +3290,7 @@ int trackno,  anacrusis;
       };
       if (featurecount == 3)
         {
-        fprintf(outhandle," (3");
+        fprintf(outhandle,"?");
         };
       printchord(step);
       if ( featurecount > 0) {
@@ -3268,7 +3303,7 @@ int trackno,  anacrusis;
       gap = gap - step;
       barnotes = barnotes - step;
       if (barnotes == 0) {
-        fprintf(outhandle,"|");
+        fprintf(outhandle,"\n");
 	reset_back_array();
         barnotes = barsize;
         barcount = barcount + 1;
@@ -3283,6 +3318,7 @@ int trackno,  anacrusis;
 	       	freshline();
 	        bars_on_line=0;}
       }
+#if 0
       else if (featurecount == 0) {
           /* note grouping algorithm */
           /* [SS] 2016-07-20 waltz is a special case */
@@ -3302,6 +3338,7 @@ int trackno,  anacrusis;
             };
           };
       }
+#endif
       if (nogr) {fprintf(outhandle," ");
 	         newline_flag = 0;
                 }
@@ -3313,6 +3350,9 @@ int trackno,  anacrusis;
   };
   freshline();
   if (barcount > maxbarcount) maxbarcount = barcount;
+#if 0
+  scannotes(trackno); /* For debugging */
+#endif
 }
 
 
@@ -3418,9 +3458,11 @@ int sharps;
       symbol[j] = flsymbol[t];
     };
     trans[j] = 7*(j/12)+((int) atog[j] - 'a');
+#if 0
     if (j < MIDDLE) {
       atog[j] = (char) (int) atog[j] + 'A' - 'a';
     };
+#endif
     if (key[t] == 0) {
       barback[trans[j]] = j; /* [SS] 2019-05-08 */
     };
@@ -3431,7 +3473,7 @@ reset_back_array(); /* [SS] 2019-05-08 */
 
 
 
-/*  Functions for supporting the command line user interface to midi2abc.     */
+/*  Functions for supporting the command line user interface to midi2xyz.     */
 
 
 int readnum(num) 
@@ -3675,13 +3717,13 @@ int argc;
   if (arg != -1)
    bars_per_staff = readnum(argv[arg]);
   else {
-       bars_per_staff=4;
+       bars_per_staff=99999; /* was 4 */
    };
   arg = getarg("-bpl",argc,argv);
   if (arg != -1)
    bars_per_line = readnum(argv[arg]);
   else {
-       bars_per_line=1;
+       bars_per_line=99999; /* was 1 */
    };
 
 
@@ -3729,8 +3771,13 @@ int argc;
     ksig_set = 1;
   } 
   else {
+#if 0
     keysig = -50;
     ksig_set = 0;
+#else
+    keysig = 0;
+    ksig_set = 1;
+#endif
   };
 
   if(guessk) ksig_set=1;
@@ -3764,7 +3811,7 @@ int argc;
   arg = getarg("-noly",argc,argv); /* [SS] 2019-07-12 */
   if (arg != -1)
      noly=1;
-  else noly = 0;
+  else noly = 1;
 
   arg = getarg("-title",argc,argv);
   if (arg != -1) {
@@ -3787,8 +3834,8 @@ int argc;
 /*    fprintf(outhandle,"%% input file %s\n", argv[arg]); */
   }
   else {
-    printf("midi2abc version %s\n  usage :\n",VERSION);
-    printf("midi2abc filename <options>\n");
+    printf("midi2xyz version %s\n  usage :\n",VERSION);
+    printf("midi2xyz filename <options>\n");
     printf("         -a <beats in anacrusis>\n");
     printf("         -xa  Extract anacrusis from file ");
     printf("(find first strong note)\n");
@@ -3827,7 +3874,7 @@ int argc;
     printf("         -ver version number\n");
     printf("         -d <number> debug parameter\n");
     printf(" None or only one of the options -aul -gu, -b, -Q -u should\n");
-    printf(" be specified. If none are present, midi2abc will uses the\n");
+    printf(" be specified. If none are present, midi2xyz will uses the\n");
     printf(" the PPQN information in the MIDI file header to determine\n");
     printf(" the suitable note length. This is the recommended method.\n");
     printf(" The input filename is assumed to be any string not\n");
@@ -3840,7 +3887,7 @@ int argc;
 
 
 
-void midi2abc (arg, argv)
+void midi2xyz (arg, argv)
 char *argv[];
 int arg;
 {
@@ -3958,7 +4005,7 @@ if (trackcount == 1) {
        header_keysig = keysig;
        setupkey(header_keysig);
 
-/* scannotes(maintrack); For debugging */
+ /* scannotes(maintrack); For debugging */
   if(debug>0) printf("finished getting header parameters.\n");
 
 /* Convert each track to abc format and print */
@@ -3969,29 +4016,29 @@ if (trackcount == 1) {
       if (track[j].notes > 0) {
         if(debug > 0) printf("outputting track %d\n",j);
         fprintf(outhandle,"V:%d\n", voiceno);
-	if (track[j].drumtrack) fprintf(outhandle,"%%%%MIDI channel 10\n");
+        if (track[j].drumtrack) fprintf(outhandle,"%%%%MIDI channel 10\n");
         voiceno = voiceno + 1;
-      pitch_percentiles(j,&ten,&ninety);
-      if (ten !=0) {
-         if(ten < 56 && ninety > 64 && ninety < 68) fprintf(outhandle,"%%%%clef bass\n");
-         if(ten < 56 && ninety > 67) fprintf(outhandle,"%%%%clef treble\n");
-          };
+        pitch_percentiles(j,&ten,&ninety);
+        if (ten !=0) {
+          if(ten < 56 && ninety > 64 && ninety < 68) fprintf(outhandle,"%%%%clef bass\n");
+          if(ten < 56 && ninety > 67) fprintf(outhandle,"%%%%clef treble\n");
+        };
 
-      if (usesplits==2) printtrack_split_voice(j, anacrusis);
-      else printtrack(j,anacrusis);
+        if (usesplits==2) printtrack_split_voice(j, anacrusis);
+        else printtrack(j,anacrusis);
       }; /*track[j].notes > 0 */
     } /* for loop */
 
-   } else {  /* trackcount == 1 */
-      pitch_percentiles(maintrack,&ten,&ninety);
-      if (ten !=0) {
-         if(ten < 56 && ninety > 64 && ninety < 70) fprintf(outhandle,"%%%%clef bass\n");
+  } else {  /* trackcount == 1 */
+    pitch_percentiles(maintrack,&ten,&ninety);
+    if (ten !=0) {
+      if(ten < 56 && ninety > 64 && ninety < 70) fprintf(outhandle,"%%%%clef bass\n");
 
-         if(ten < 56 && ninety > 69) fprintf(outhandle,"%%%%clef treble\n");
-	   
-      }
-     if (usesplits==2) printtrack_split_voice(maintrack, anacrusis);
-     else printtrack(maintrack,anacrusis);
+      if(ten < 56 && ninety > 69) fprintf(outhandle,"%%%%clef treble\n");
+
+    }
+    if (usesplits==2) printtrack_split_voice(maintrack, anacrusis);
+    else printtrack(maintrack,anacrusis);
   };
 
   /* scannotes(maintrack); for debugging */
@@ -4095,6 +4142,6 @@ int argc;
   if(midiprint ==1) { midigram(argc,argv);
   } else if(midiprint ==2)  { mftext(argc,argv);
   } else if(stats == 1) { midistats(argc,argv);
-  } else midi2abc(argc,argv); 
+  } else midi2xyz(argc,argv);
   return 0;
 }
