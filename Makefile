@@ -67,6 +67,11 @@ abc2abc : $(OBJECTS_ABC2ABC)
 	$(CC) $(CFLAGS) -o abc2abc $(OBJECTS_ABC2ABC) $(LDFLAGS)
 $(OBJECTS_ABC2ABC): abc.h parseabc.h config.h Makefile
 
+OBJECTS_MIDI2ABC=midifile.o midi2abc.o 
+midi2abc : $(OBJECTS_MIDI2ABC)
+	$(CC) $(CFLAGS) -o midi2abc $(OBJECTS_MIDI2ABC) $(LDFLAGS)
+$(OBJECTS_MIDI2ABC): abc.h midifile.h config.h Makefile
+
 OBJECTS_MIDI2XYZ=midifile.o midi2xyz.o 
 midi2xyz : $(OBJECTS_MIDI2XYZ)
 	$(CC) $(CFLAGS) -o midi2xyz $(OBJECTS_MIDI2XYZ) $(LDFLAGS)
