@@ -1628,13 +1628,13 @@ char *mess;
   if (prtime(timeunits)) return;
   printf("Metatext (%s) ",ttype[type]);
   len = leng;
-  if (len > 15) len = 15;
+  /* if (len > 15) len = 15; */
   for ( n=0; n<len; n++ ) {
     c = (*p++) & 0xff;
     if(iscntrl(c)) {printf(" \\0x%02x",c); continue;} /* no <cr> <lf> */
     printf( (isprint(c)||isspace(c)) ? "%c" : "\\0x%02x" , c);
   }
-  if (leng>15) printf("...");
+  /* if (leng>15) printf("..."); */
   printf("\n");
 }
 
