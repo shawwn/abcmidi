@@ -887,7 +887,7 @@ char *mess;
     karaoke = 1;
   } 
   else {
-    if ((karaoke == 1) && (*textbuff != '@')) {
+    if ((karaoke == 1) && (*textbuff != '@') || 1) {
       addtext(textbuff,0);
     } 
     else {
